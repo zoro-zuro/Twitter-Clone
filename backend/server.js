@@ -7,6 +7,7 @@ import connectdb from "./db/db.js";
 import authRouter from "./routes/auth.routes.js";
 import userRouter from "./routes/user.routes.js";
 import testRouter from "./routes/test.routes.js";
+import postRouter from "./routes/post.routes.js";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -25,7 +26,7 @@ app.use(cookieParser());
 app.use("/api/v1/test", testRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/user", userRouter);
-
+app.use("/api/v1/post", postRouter);
 app.get("/", (req, res) => {
   res.send("Hello, World!");
 });
