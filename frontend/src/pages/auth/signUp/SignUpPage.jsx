@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import XSvg from "../../../components/svgs/X";
 
@@ -7,25 +8,57 @@ import { MdOutlineMail } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { MdPassword } from "react-icons/md";
 import { MdDriveFileRenameOutline } from "react-icons/md";
+import toast from "react-hot-toast";
 
 const SignUpPage = () => {
   const [formData, setFormData] = useState({
     email: "",
     username: "",
-    fullName: "",
+    fullname: "",
     password: "",
+  });
+  const { mutate, isError, isPending, error } = useMutation({
+    mutationFn: async ({ username, fullname, email, password }) => {
+      try {
+        const res = await fetch("/api/v1/auth/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, fullname, email, password }),
+        });
+
+        // if (!res.ok) throw new Error("Something went wrong");
+
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        console.log(data);
+        return data;
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Account created successfully 🎉");
+      setFormData({
+        email: "",
+        username: "",
+        fullname: "",
+        password: "",
+      });
+    },
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
+    mutate(formData);
   };
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
-  const isError = false;
 
   return (
     <div className="max-w-screen-xl mx-auto flex h-screen px-10 ">
@@ -71,9 +104,9 @@ const SignUpPage = () => {
                 type="text"
                 className="grow"
                 placeholder="Full Name"
-                name="fullName"
+                name="fullname"
                 onChange={handleInputChange}
-                value={formData.fullName}
+                value={formData.fullname}
               />
             </label>
           </div>
@@ -93,9 +126,9 @@ const SignUpPage = () => {
             className="btn rounded-full btn-primary text-white  hover:shadow-[0_0_15px_.8px_#1DA1F2]
            transition ease-in-out duration-300"
           >
-            Sign up
+            {isPending ? "Loading.." : "Sign up"}
           </button>
-          {isError && <p className="text-red-500">Something went wrong</p>}
+          {isError && <p className="text-red-500">{error.message}</p>}
         </form>
 
         <div className="flex flex-col gap-3 md:flex-row md:w-2/3  items-center md:gap-1 justify-between mt-4 w-full">

@@ -1,12 +1,15 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+
 import HomePage from "./pages/home/HomePage";
 import LoginPage from "./pages/auth/login/LoginPage";
 import SignUpPage from "./pages/auth/signUp/SignUpPage";
-import Sidebar from "./components/common/Sidebar";
-import RightPanel from "./components/common/RightPanel";
 import NotificationPage from "./pages/notification/Notification";
 import ProfilePage from "./pages/profile/ProfilePage";
+
+import Sidebar from "./components/common/Sidebar";
+import RightPanel from "./components/common/RightPanel";
 const App = () => {
   return (
     <div class="flex max-w-6xl mx-auto">
@@ -21,6 +24,7 @@ const App = () => {
       </Routes>
 
       <RightPanel />
+      <Toaster />
     </div>
   );
 };
