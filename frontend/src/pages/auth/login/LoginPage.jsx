@@ -14,6 +14,8 @@ const LoginPage = () => {
     password: "",
   });
 
+  const querryClient = useQueryClient();
+
   const { mutate, isError, isPending, error } = useMutation({
     mutationFn: async ({ username, password }) => {
       try {
@@ -38,6 +40,7 @@ const LoginPage = () => {
     },
     onSuccess: () => {
       toast.success("Authentication successfull 🎉");
+      querryClient.invalidateQueries({ queryKey: ["authUser"] });
       setFormData({
         username: "",
         password: "",

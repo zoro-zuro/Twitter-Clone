@@ -8,7 +8,7 @@ authRouter.post("/signup", signup);
 
 authRouter.post("/login", login);
 
-authRouter.delete("/logout", logout);
+authRouter.post("/logout", logout);
 
 authRouter.get("/me", authenticateToken, getMe);
 export default authRouter;

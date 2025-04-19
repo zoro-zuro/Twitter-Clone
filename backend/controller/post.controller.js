@@ -202,7 +202,7 @@ const allPosts = async (req, res) => {
     res.json({
       success: true,
       message: "Posts fetched successfully",
-      data: posts.reverse(),
+      posts: posts.reverse(),
     });
   } catch (error) {
     res.status(500).json({
@@ -274,8 +274,9 @@ const getfollowingPost = async (req, res) => {
       });
 
     if (followingpst.length === 0) {
-      return res.status(404).json({
+      return res.status(200).json({
         success: true,
+        posts: followingpst,
         message: "no post found",
       });
     }
