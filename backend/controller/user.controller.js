@@ -138,27 +138,30 @@ const suggestedUser = async (req, res) => {
     if (suggestedIds.length > 0) {
       const suggestedUsers = await User.find({
         _id: { $in: suggestedIds.map((id) => new mongoose.Types.ObjectId(id)) },
-      }).select("username fullname");
+      }).select("username fullname profileImg");
       userToSuggest = suggestedUsers;
     }
 
     const remaining = 4 - userToSuggest.length;
 
     if (remaining > 0) {
+      // Convert IDs correctly using new mongoose.Types.ObjectId()
+      const excludeIds = [
+        ...userFollowed.map((id) => id), // Already ObjectIds
+        ...suggestedIds.map((id) => new mongoose.Types.ObjectId(id)),
+      ];
+
       const randomUsers = await User.aggregate([
         {
           $match: {
-            _id: { $ne: userId },
             _id: {
-              $nin: [
-                ...userFollowed,
-                ...suggestedIds.map((id) => new mongoose.Types.ObjectId(id)),
-              ],
+              $ne: userId, // Already an ObjectId
+              $nin: excludeIds,
             },
           },
         },
         { $sample: { size: remaining } },
-        { $project: { username: 1, fullname: 1 } },
+        { $project: { username: 1, fullname: 1, profileImg: 1 } },
       ]);
 
       userToSuggest = [...userToSuggest, ...randomUsers];

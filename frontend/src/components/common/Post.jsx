@@ -5,7 +5,12 @@ import { FaRegBookmark } from "react-icons/fa6";
 import { FaTrash } from "react-icons/fa";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import LoadingSpinner from "./LoadingSpinner";
 
@@ -56,14 +61,51 @@ const Post = ({ post }) => {
       querryClient.invalidateQueries({ queryKey: ["posts"] });
     },
   });
+
+  const { mutate: likePost, isPending: isLinking } = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await fetch(`/api/v1/post/like/${post._id}`, {
+          method: "POST",
+        });
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+          throw new Error(
+            data.error ? data.error.message : "Something went wrong"
+          );
+        }
+
+        return data;
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    },
+    onSuccess: (updatedLikes) => {
+      // Update cache to match the array structure
+      querryClient.setQueryData(["posts"], (oldPosts) => {
+        if (!Array.isArray(oldPosts)) return oldPosts;
+
+        return oldPosts.map((p) =>
+          p._id === post._id
+            ? { ...p, likes: updatedLikes, likesCount: updatedLikes.length }
+            : p
+        );
+      });
+    },
+    onError: (error) => {
+      throw new Error(error.message);
+    },
+  });
+
   const postOwner = post.user;
-  const isLiked = false;
+  const isLiked = post.likes.includes(authUser._id);
 
   const isMyPost = authUser._id === post.user._id;
 
   const formattedDate = "1h";
 
-  const isCommenting = false;
+  const isCommenting = true;
 
   const handleDeletePost = () => {
     deletePost();
@@ -73,7 +115,10 @@ const Post = ({ post }) => {
     e.preventDefault();
   };
 
-  const handleLikePost = () => {};
+  const handleLikePost = () => {
+    if (isLinking) return;
+    likePost();
+  };
 
   return (
     <>
@@ -185,11 +230,7 @@ const Post = ({ post }) => {
                       onChange={(e) => setComment(e.target.value)}
                     />
                     <button className="btn btn-primary rounded-full btn-sm text-white px-4">
-                      {isCommenting ? (
-                        <span className="loading loading-spinner loading-md"></span>
-                      ) : (
-                        "Post"
-                      )}
+                      {isCommenting ? <LoadingSpinner size="md" /> : "Post"}
                     </button>
                   </form>
                 </div>
@@ -207,16 +248,17 @@ const Post = ({ post }) => {
                 className="flex gap-1 items-center group cursor-pointer"
                 onClick={handleLikePost}
               >
-                {!isLiked && (
+                {isLinking && <LoadingSpinner size="sm" />}
+                {!isLiked && !isLinking && (
                   <FaRegHeart className="w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500" />
                 )}
-                {isLiked && (
+                {isLiked && !isLinking && (
                   <FaRegHeart className="w-4 h-4 cursor-pointer text-pink-500 " />
                 )}
 
                 <span
-                  className={`text-sm text-slate-500 group-hover:text-pink-500 ${
-                    isLiked ? "text-pink-500" : ""
+                  className={`text-sm  group-hover:text-pink-500 ${
+                    isLiked ? "text-pink-500" : "text-slate-500"
                   }`}
                 >
                   {post.likes.length}

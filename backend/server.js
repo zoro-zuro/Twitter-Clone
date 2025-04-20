@@ -10,18 +10,19 @@ import testRouter from "./routes/test.routes.js";
 import postRouter from "./routes/post.routes.js";
 import notifyRouter from "./routes/notification.routes.js";
 
+dotenv.config();
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-dotenv.config();
 
 const port = process.env.PORT || 3000;
 const nodeEnv = process.env.NODE_ENV;
 const app = express();
 
-app.use(express.json());
+app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
 
 app.use("/api/v1/test", testRouter);

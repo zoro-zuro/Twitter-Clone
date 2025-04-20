@@ -114,7 +114,7 @@ const Sidebar = () => {
             <div className="flex md:justify-between justify-center flex-1 items-center h-full">
               <div className="hidden md:block">
                 <p className="text-white font-bold text-[15px] w-20 truncate">
-                  {authUser?.fullName}
+                  {authUser?.fullname}
                 </p>
                 <p className="text-slate-500 text-sm">@{authUser?.username}</p>
               </div>

@@ -24,10 +24,9 @@ const createPost = async (req, res) => {
       });
     }
     if (img) {
-      const imgResponse = await cloudinary.uploader.upload(img);
-      img = imgResponse.secure_url;
+      const uploadedResponse = await cloudinary.uploader.upload(img);
+      img = uploadedResponse.secure_url;
     }
-
     const post = new Post({
       user: userId,
       text,
@@ -42,7 +41,7 @@ const createPost = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error,
+      message: error.message,
     });
   }
 };
@@ -130,29 +129,27 @@ const commentPost = async (req, res) => {
 const toggleLikePost = async (req, res) => {
   try {
     const userId = req.user._id;
-    const postId = req.params.id;
+    const { id: postId } = req.params;
 
     const post = await Post.findById(postId);
+
     if (!post) {
-      return res.status(400).json({
-        success: false,
-        message: "Post is not found",
-      });
+      return res.status(404).json({ error: "Post not found" });
     }
 
-    if (post.likes.includes(userId)) {
+    const userLikedPost = post.likes.includes(userId);
+
+    if (userLikedPost) {
+      // Unlike post
       await Post.updateOne({ _id: postId }, { $pull: { likes: userId } });
       await User.updateOne({ _id: userId }, { $pull: { likedPosts: postId } });
 
       const updatedLikes = post.likes.filter(
         (id) => id.toString() !== userId.toString()
       );
-      return res.status(200).json({
-        success: true,
-        message: "Post unliked successfully",
-        data: updatedLikes,
-      });
+      res.status(200).json(updatedLikes);
     } else {
+      // Like post
       post.likes.push(userId);
       await User.updateOne({ _id: userId }, { $push: { likedPosts: postId } });
       await post.save();
@@ -165,17 +162,11 @@ const toggleLikePost = async (req, res) => {
       await notification.save();
 
       const updatedLikes = post.likes;
-      return res.status(200).json({
-        success: true,
-        message: "Post liked successfully",
-        data: updatedLikes,
-      });
+      res.status(200).json(updatedLikes);
     }
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    console.log("Error in likeUnlikePost controller: ", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
