@@ -28,8 +28,8 @@ const RightPanel = () => {
   return (
     <div className="hidden lg:block py-5 mx-5 ">
       <div className="bg-[#16181C] p-4 rounded-md sticky top-2">
-        <p className="font-bold">Who to follow</p>
-        <div className="flex flex-col gap-4">
+        <p className="font-bold w-full text-center uppercase">Who to follow</p>
+        <div className="flex my-2 flex-col gap-4">
           {/* item */}
           {isLoading && (
             <>
@@ -43,7 +43,7 @@ const RightPanel = () => {
             suggestedUsers?.map((user) => (
               <Link
                 to={`/profile/${user.username}`}
-                className="flex items-center justify-between gap-4"
+                className="flex items-center justify-between gap-4 m-2"
                 key={user._id}
               >
                 <div className="flex gap-2 items-center">

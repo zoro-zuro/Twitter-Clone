@@ -110,14 +110,11 @@ const commentPost = async (req, res) => {
       user: userId,
       text,
     };
-
+    const updatedComment = post.comments;
+    console.log(updatedComment);
     post.comments.push(comment);
     await post.save();
-    res.json({
-      success: true,
-      message: "Comment added successfully",
-      data: comment,
-    });
+    res.json(updatedComment);
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -187,7 +184,7 @@ const allPosts = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "No posts found",
-        data: [],
+        posts: [],
       });
     }
     res.json({
@@ -308,9 +305,10 @@ const getUserPosts = async (req, res) => {
       });
 
     if (userPost.length === 0) {
-      return res.status(404).json({
-        success: false,
+      return res.status(200).json({
+        success: true,
         message: "no post found",
+        posts: [],
       });
     }
 

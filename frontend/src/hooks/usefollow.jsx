@@ -29,6 +29,7 @@ const usefollow = () => {
       Promise.all([
         querryClient.invalidateQueries({ queryKey: ["suggestedUsers"] }),
         querryClient.invalidateQueries({ queryKey: ["authUser"] }),
+        querryClient.invalidateQueries({ queryKey: ["user"] }),
       ]);
     },
     onError: (error) => {

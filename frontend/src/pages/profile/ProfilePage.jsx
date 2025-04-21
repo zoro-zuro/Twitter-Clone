@@ -6,12 +6,14 @@ import ProfileHeaderSkeleton from "../../components/skeletons/ProfileHeaderSkele
 import EditProfileModal from "./EditProfileModal";
 
 import { POSTS } from "../../utils/db/dummy";
+import usefollow from "../../hooks/usefollow";
 
 import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
 import { FaLink } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
 
 const ProfilePage = () => {
   const [coverImg, setCoverImg] = useState(null);
@@ -21,8 +23,28 @@ const ProfilePage = () => {
   const coverImgRef = useRef(null);
   const profileImgRef = useRef(null);
   const { username } = useParams();
+  const querryClient = useQueryClient();
 
-  const isMyProfile = true;
+  const { data: authUser } = useQuery({
+    queryKey: ["authUser"],
+    queryFn: async () => {
+      try {
+        const res = await fetch("/api/v1/auth/me");
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Something went wrong");
+        }
+
+        console.log("authUser is here:", data);
+        return data.user;
+      } catch (error) {
+        console.error("Auth error:", error);
+        return null;
+      }
+    },
+    retry: false,
+  });
 
   const {
     data: user,
@@ -30,7 +52,7 @@ const ProfilePage = () => {
     refetch,
     isRefetching,
   } = useQuery({
-    queryKey: ["user"],
+    queryKey: ["user", username],
     queryFn: async () => {
       try {
         const res = await fetch(`/api/v1/user/profile/${username}`);
@@ -48,7 +70,10 @@ const ProfilePage = () => {
 
   useEffect(() => {
     refetch();
-  }, [username, refetch]);
+    querryClient.invalidateQueries({ queryKey: ["posts"] });
+  }, [username]);
+
+  const isMyProfile = authUser?._id === user?._id;
 
   const handleImgChange = (e, state) => {
     const file = e.target.files[0];
@@ -61,6 +86,8 @@ const ProfilePage = () => {
       reader.readAsDataURL(file);
     }
   };
+
+  const { isPending, follow } = usefollow();
 
   return (
     <>
@@ -140,9 +167,12 @@ const ProfilePage = () => {
                 {!isMyProfile && (
                   <button
                     className="btn btn-outline rounded-full btn-sm"
-                    onClick={() => alert("Followed successfully")}
+                    onClick={() => follow(user?._id)}
                   >
-                    Follow
+                    {isPending && <LoadingSpinner size="sm" />}
+                    {!isPending && authUser?.following.includes(user?._id)
+                      ? "unfollow"
+                      : "follow"}
                   </button>
                 )}
                 {(coverImg || profileImg) && (
@@ -227,7 +257,7 @@ const ProfilePage = () => {
             </>
           )}
 
-          <Posts />
+          <Posts username={user?.username} />
         </div>
       </div>
     </>

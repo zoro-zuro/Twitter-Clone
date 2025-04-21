@@ -1,35 +1,65 @@
 import { Link } from "react-router-dom";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
-
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { TiDeleteOutline } from "react-icons/ti";
 import { IoSettingsOutline } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
 
 const NotificationPage = () => {
-  const isLoading = false;
-  const notifications = [
-    {
-      _id: "1",
-      from: {
-        _id: "1",
-        username: "johndoe",
-        profileImg: "/avatars/boy2.png",
-      },
-      type: "follow",
-    },
-    {
-      _id: "2",
-      from: {
-        _id: "2",
-        username: "janedoe",
-        profileImg: "/avatars/girl1.png",
-      },
-      type: "like",
-    },
-  ];
+  const { data: notifications, isLoading } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: async () => {
+      try {
+        const res = await fetch("/api/v1/notify/all");
+        const data = await res.json();
 
-  const deleteNotifications = () => {
-    alert("All notifications deleted");
+        if (!res.ok || data.error) {
+          throw new Error(data.error ? data.error : "Something went wrong");
+        }
+
+        return data.notifications;
+      } catch (error) {
+        throw new Error(error);
+      }
+    },
+  });
+
+  const querryClient = useQueryClient();
+
+  const { mutate: deleteNotif, isLoading: isDeleting } = useMutation({
+    mutationFn: async (notifId) => {
+      try {
+        const res = await fetch(
+          `/api/v1/notify${notifId ? "/one/" + notifId : "/all"}`,
+          {
+            method: "DELETE",
+          }
+        );
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+          throw new Error(data.error ? data.error : "Something went wrong");
+        }
+
+        return data;
+      } catch (error) {
+        throw new Error(error);
+      }
+    },
+    onSuccess: () => {
+      toast.success("Successfully deleted");
+      querryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+    onError: (error) => {
+      throw new Error(error.message);
+    },
+  });
+
+  const deleteNotifications = (notifId) => {
+    if (isDeleting) return;
+    notifId ? deleteNotif(notifId) : deleteNotif();
   };
 
   return (
@@ -60,32 +90,52 @@ const NotificationPage = () => {
           <div className="text-center p-4 font-bold">No notifications 🤔</div>
         )}
         {notifications?.map((notification) => (
-          <div className="border-b border-gray-700" key={notification._id}>
-            <div className="flex gap-2 p-4">
+          <div
+            className="border-b border-gray-700 w-full flex justify-between"
+            key={notification._id}
+          >
+            <div className="flex gap-2 p-4 w-full">
               {notification.type === "follow" && (
                 <FaUser className="w-7 h-7 text-primary" />
               )}
               {notification.type === "like" && (
                 <FaHeart className="w-7 h-7 text-red-500" />
               )}
-              <Link to={`/profile/${notification.from.username}`}>
-                <div className="avatar">
-                  <div className="w-8 rounded-full">
-                    <img
-                      src={
-                        notification.from.profileImg ||
-                        "/avatar-placeholder.png"
-                      }
-                    />
+              <Link
+                className="w-full"
+                to={`/profile/${notification.from.username}`}
+              >
+                <div className="flex justify-between h-full w-full items-center">
+                  <div className="flex flex-row gap-2 h-full w-full items-center">
+                    <div className="avatar">
+                      <div className="w-8 rounded-full">
+                        <img
+                          src={
+                            notification.from.profileImg ||
+                            "/avatar-placeholder.png"
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-1 w-full">
+                      <span className="font-bold">
+                        @{notification.from.username}
+                      </span>{" "}
+                      {notification.type === "follow"
+                        ? "followed you"
+                        : "liked your post"}
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-1">
-                  <span className="font-bold">
-                    @{notification.from.username}
-                  </span>{" "}
-                  {notification.type === "follow"
-                    ? "followed you"
-                    : "liked your post"}
+                  <div
+                    className=""
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      deleteNotifications(notification._id);
+                    }}
+                  >
+                    <TiDeleteOutline className="w-6 h-6 hover:text-orange-500" />
+                  </div>
                 </div>
               </Link>
             </div>
