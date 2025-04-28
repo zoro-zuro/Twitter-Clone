@@ -227,7 +227,7 @@ const getlikedPost = async (req, res) => {
     res.json({
       success: true,
       message: "Posts fetched successfully",
-      data: likedpst,
+      posts: likedpst,
     });
   } catch (error) {
     res.status(500).json({

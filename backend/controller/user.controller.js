@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { v2 as cloudinary } from "cloudinary";
+import bcrypt from "bcryptjs";
 
 import Notification from "../model/notification.model.js";
 import User from "../model/user.model.js";
@@ -188,7 +189,8 @@ const suggestedUser = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  const { fullname, email, currentPassword, newPassword, bio, link } = req.body;
+  const { fullname, email, currentPassword, newPassword, bio, link, username } =
+    req.body;
 
   let { profileImg, coverImg } = req.body;
 
@@ -202,18 +204,20 @@ const updateUser = async (req, res) => {
       });
     }
 
+    email ? console.log(email) : console.log("email not found" + email);
+
     if (
       (!newPassword && currentPassword) ||
       (!currentPassword && newPassword)
     ) {
-      res.status(404).json({
+      return res.status(404).json({
         success: false,
-        message: "Please provide current password or new password",
+        message: "Please provide current password and new password",
       });
     }
 
     if (currentPassword && newPassword) {
-      const isMatch = await bcrypt.compare(user.password, currentPassword);
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
 
       if (!isMatch) {
         return res.status(400).json({
@@ -234,26 +238,33 @@ const updateUser = async (req, res) => {
 
       await user.save();
     }
+
     if (coverImg) {
       if (user.coverImg) {
-        await cloudinary.uploader.destroy(
-          user.coverImg.split("/".pop().split(".")[0])
-        );
+        try {
+          const publicId = user.coverImg.split("/").pop().split(".")[0];
+          await cloudinary.uploader.destroy(publicId);
+        } catch (err) {
+          console.error("Error deleting old cover image:", err);
+        }
       }
 
-      const uplodedResponse = await cloudinary.uploader.upload(coverImg);
-      coverImg = uplodedResponse.secure_url;
+      const uploadedResponse = await cloudinary.uploader.upload(coverImg);
+      coverImg = uploadedResponse.secure_url;
     }
 
     if (profileImg) {
       if (user.profileImg) {
-        await cloudinary.uploader.destroy(
-          user.profileImg.split("/".pop().split(".")[0])
-        );
+        try {
+          const publicId = user.profileImg.split("/").pop().split(".")[0];
+          await cloudinary.uploader.destroy(publicId);
+        } catch (err) {
+          console.error("Error deleting old profile image:", err);
+        }
       }
 
-      const uplodedResponse = await cloudinary.uploader.upload(profileImg);
-      profileImg = uplodedResponse.secure_url;
+      const uploadedResponse = await cloudinary.uploader.upload(profileImg);
+      profileImg = uploadedResponse.secure_url;
     }
 
     const newUser = await User.findByIdAndUpdate(
@@ -265,6 +276,7 @@ const updateUser = async (req, res) => {
         coverImg,
         bio,
         link,
+        username,
       },
       { new: true }
     );

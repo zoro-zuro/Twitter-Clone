@@ -13,6 +13,8 @@
     "@tailwindcss/vite": "^4.1.3",
     "@tanstack/react-query": "^5.74.3",
     "@tanstack/react-ranger": "^0.0.4",
+    "emoji-picker-react": "^4.12.2",
+    "loadash": "^1.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.5.2",

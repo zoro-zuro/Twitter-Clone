@@ -6,6 +6,7 @@ import { TiDeleteOutline } from "react-icons/ti";
 import { IoSettingsOutline } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
+import { useState } from "react";
 
 const NotificationPage = () => {
   const { data: notifications, isLoading } = useQuery({
@@ -28,11 +29,13 @@ const NotificationPage = () => {
 
   const querryClient = useQueryClient();
 
+  const [notifyId, setnotifyId] = useState("");
+
   const { mutate: deleteNotif, isLoading: isDeleting } = useMutation({
-    mutationFn: async (notifId) => {
+    mutationFn: async (notifyId) => {
       try {
         const res = await fetch(
-          `/api/v1/notify${notifId ? "/one/" + notifId : "/all"}`,
+          `/api/v1/notify${notifyId == "" ? `/one/${notifyId}` : "/"}`,
           {
             method: "DELETE",
           }
@@ -59,7 +62,10 @@ const NotificationPage = () => {
 
   const deleteNotifications = (notifId) => {
     if (isDeleting) return;
-    notifId ? deleteNotif(notifId) : deleteNotif();
+    if (notifId) {
+      setnotifyId(notifId);
+    }
+    deleteNotif();
   };
 
   return (

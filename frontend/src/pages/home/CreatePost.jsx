@@ -4,14 +4,17 @@ import { useRef, useState } from "react";
 import { IoCloseSharp } from "react-icons/io5";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import EmojiPicker from "emoji-picker-react"; // Correct import for EmojiPicker
+import { MdCancel } from "react-icons/md";
 
 const CreatePost = () => {
   const [text, setText] = useState("");
   const [img, setImg] = useState(null);
   const imgRef = useRef(null);
+  const [showemoji, setShowemoji] = useState(false);
 
   const { data: authUser } = useQuery({
-    queryKey: ["authUser"], // Fixed: uppercase 'K' and array syntax
+    queryKey: ["authUser"],
     queryFn: async () => {
       try {
         const res = await fetch("/api/v1/auth/me");
@@ -30,7 +33,8 @@ const CreatePost = () => {
     },
     retry: false,
   });
-  const queryClient = useQueryClient(); // Fixed: typo in variable name
+
+  const queryClient = useQueryClient();
 
   const {
     mutate: createPost,
@@ -43,12 +47,9 @@ const CreatePost = () => {
         const res = await fetch("/api/v1/post/create", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json", // Fixed: removed leading slash
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            text,
-            img,
-          }),
+          body: JSON.stringify({ text, img }),
         });
         const data = await res.json();
 
@@ -66,7 +67,7 @@ const CreatePost = () => {
       toast.success("Post created successfully🎉");
 
       setImg(null);
-      setText(""); // Fixed: was trying to set img to empty string
+      setText("");
       queryClient.invalidateQueries({ queryKey: ["posts"] });
     },
   });
@@ -87,11 +88,18 @@ const CreatePost = () => {
     }
   };
 
+  const handleEmojiClick = (emojiObject) => {
+    setText((prev) => prev + emojiObject.emoji);
+  };
+
   return (
     <div className="flex p-4 items-start gap-4 border-b border-gray-700">
       <div className="avatar">
         <div className="w-8 rounded-full">
-          <img src={authUser?.profileImg || "/avatar-placeholder.png"} />
+          <img
+            src={authUser?.profileImg || "/avatar-placeholder.png"}
+            alt="User avatar"
+          />
         </div>
       </div>
       <form className="flex flex-col gap-2 w-full" onSubmit={handleSubmit}>
@@ -113,6 +121,7 @@ const CreatePost = () => {
             <img
               src={img}
               className="w-full mx-auto h-72 object-contain rounded"
+              alt="Post attachment"
             />
           </div>
         )}
@@ -123,12 +132,25 @@ const CreatePost = () => {
               className="fill-primary w-6 h-6 cursor-pointer"
               onClick={() => imgRef.current.click()}
             />
-            <BsEmojiSmileFill className="fill-primary w-5 h-5 cursor-pointer" />
+            <BsEmojiSmileFill
+              className="fill-primary w-5 h-5 cursor-pointer"
+              onClick={() => setShowemoji((prev) => !prev)}
+            />
           </div>
+          {showemoji && (
+            <div className="absolute z-50 mt-2">
+              <MdCancel
+                className="w-5 h-5 top-0 right-0 hover:cursor-pointer"
+                onClick={() => setShowemoji((prev) => !prev)}
+              />
+              <EmojiPicker onEmojiClick={handleEmojiClick} />
+            </div>
+          )}
+
           <input
             type="file"
             hidden
-            accept="image/*" // Fixed: was "images/*"
+            accept="image/*"
             ref={imgRef}
             onChange={handleImgChange}
           />
@@ -141,4 +163,5 @@ const CreatePost = () => {
     </div>
   );
 };
+
 export default CreatePost;

@@ -9,6 +9,7 @@ import userRouter from "./routes/user.routes.js";
 import testRouter from "./routes/test.routes.js";
 import postRouter from "./routes/post.routes.js";
 import notifyRouter from "./routes/notification.routes.js";
+import searchRouter from "./routes/search.route.js";
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/post", postRouter);
 app.use("/api/v1/notify", notifyRouter);
+app.use("/api/v1/search", searchRouter);
 app.get("/", (req, res) => {
   res.send("Hello, World!");
 });

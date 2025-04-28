@@ -13,7 +13,6 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: [true, "Email is required."], // Custom message
       unique: true,
       match: [
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/, // Regex for valid email format

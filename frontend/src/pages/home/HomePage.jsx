@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import Posts from "../../components/common/Posts";
 import CreatePost from "./CreatePost";
 
@@ -42,4 +41,5 @@ const HomePage = () => {
     </>
   );
 };
+
 export default HomePage;
