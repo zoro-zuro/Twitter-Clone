@@ -87,6 +87,122 @@ const userNetwork = async (req, res) => {
   }
 };
 
+const getFollowing = async (req, res) => {
+  try {
+    const username = req?.params.username;
+
+    if (!username) {
+      return res.status(404).json({
+        success: false,
+        message: "No user Id",
+      });
+    }
+
+    const currentUser = await User.findOne({ username });
+
+    if (!currentUser) {
+      return res.status(404).json({
+        success: false,
+        message: "cant find current user",
+      });
+    }
+
+    let currentUserFollowing = currentUser.following;
+
+    if (!currentUserFollowing) {
+      return res.status(404).json({
+        success: false,
+        message: "Cant find current user following",
+        currentUser,
+        currentUserFollowing,
+      });
+    }
+
+    if (currentUserFollowing.length > 0) {
+      currentUserFollowing = await Promise.all(
+        currentUserFollowing.map((user) =>
+          User.findById(user).select("_id username fullname profileImg")
+        )
+      );
+    }
+
+    if (!currentUserFollowing.length) {
+      return res.status(404).json({
+        success: false,
+        message: "Current user is not following anyone",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      friends: currentUserFollowing,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const getFollowers = async (req, res) => {
+  try {
+    const username = req?.params.username;
+
+    if (!username) {
+      return res.status(404).json({
+        success: false,
+        message: "No user Id",
+      });
+    }
+
+    const currentUser = await User.findOne({ username });
+
+    if (!currentUser) {
+      return res.status(404).json({
+        success: false,
+        message: "cant find current user",
+      });
+    }
+
+    const currentUserFollowers = currentUser.followers;
+
+    if (!currentUserFollowers) {
+      return res.status(404).json({
+        success: false,
+        message: "Cant find current user following",
+        currentUserFollowers: currentUserFollowers,
+      });
+    }
+
+    if (currentUserFollowers.length > 0) {
+      currentUserFollowers = await Promise.all(
+        currentUserFollowers.map((user) =>
+          User.findById(user).select("_id username fullname profileImg")
+        )
+      );
+    }
+
+    if (!currentUserFollowers.length) {
+      return res.status(200).json({
+        success: true,
+        message: "Current user is not following anyone",
+        friends: currentUserFollowers,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      friends: currentUserFollowers,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 const suggestedUser = async (req, res) => {
   try {
     const userId = req.user?._id;
@@ -293,4 +409,11 @@ const updateUser = async (req, res) => {
   }
 };
 
-export { getProfile, userNetwork, suggestedUser, updateUser };
+export {
+  getProfile,
+  userNetwork,
+  suggestedUser,
+  updateUser,
+  getFollowers,
+  getFollowing,
+};

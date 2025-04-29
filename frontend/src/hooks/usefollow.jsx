@@ -30,6 +30,7 @@ const usefollow = () => {
         querryClient.invalidateQueries({ queryKey: ["suggestedUsers"] }),
         querryClient.invalidateQueries({ queryKey: ["authUser"] }),
         querryClient.invalidateQueries({ queryKey: ["user"] }),
+        querryClient.invalidateQueries({ queryKey: ["friends"] }),
       ]);
     },
     onError: (error) => {

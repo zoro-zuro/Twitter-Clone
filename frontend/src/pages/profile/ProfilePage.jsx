@@ -134,7 +134,7 @@ const ProfilePage = () => {
 
   return (
     <>
-      <div className="flex-[4_4_0]  border-r border-gray-700 min-h-screen ">
+      <div className="flex-[4_4_0]  border-r border-gray-700 min-h-screen  pb-[52px] md:pb-0">
         {/* HEADER */}
         {(isRefetching || isLoading) && <ProfileHeaderSkeleton />}
         {!isLoading && !isRefetching && !user && (
@@ -263,20 +263,22 @@ const ProfilePage = () => {
                     </span>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <div className="flex gap-1 items-center">
-                    <span className="font-bold text-xs">
-                      {user?.following.length}
-                    </span>
-                    <span className="text-slate-500 text-xs">Following</span>
+                <Link to={`/friends/${user.username}`}>
+                  <div className="flex gap-2">
+                    <div className="flex gap-1 items-center">
+                      <span className="font-bold text-xs">
+                        {user?.following.length}
+                      </span>
+                      <span className="text-slate-500 text-xs">Following</span>
+                    </div>
+                    <div className="flex gap-1 items-center">
+                      <span className="font-bold text-xs">
+                        {user?.followers.length}
+                      </span>
+                      <span className="text-slate-500 text-xs">Followers</span>
+                    </div>
                   </div>
-                  <div className="flex gap-1 items-center">
-                    <span className="font-bold text-xs">
-                      {user?.followers.length}
-                    </span>
-                    <span className="text-slate-500 text-xs">Followers</span>
-                  </div>
-                </div>
+                </Link>
               </div>
               <div className="flex w-full border-b border-gray-700 mt-4">
                 <div

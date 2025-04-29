@@ -32,6 +32,7 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/post", postRouter);
 app.use("/api/v1/notify", notifyRouter);
 app.use("/api/v1/search", searchRouter);
+
 app.get("/", (req, res) => {
   res.send("Hello, World!");
 });

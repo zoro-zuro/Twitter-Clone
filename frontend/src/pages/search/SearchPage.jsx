@@ -45,7 +45,7 @@ const SearchPage = () => {
   };
 
   return (
-    <div className="flex-[4_4_0] border-l border-r border-gray-700 min-h-screen">
+    <div className="flex-[4_4_0] border-l border-r border-gray-700 min-h-screen pb-[52px] md:pb-0">
       {/* Search Input */}
       <div className="flex justify-center items-center p-4 border-gray-700">
         <label className="input border-none bg-[#16181C] rounded-full flex items-center">

@@ -163,26 +163,32 @@ const Post = ({ post }) => {
   return (
     <>
       <div className="flex gap-2 items-start p-4 pr-6 border-b border-gray-700">
-        <div className="avatar">
-          <Link
-            to={`/profile/${postOwner.username}`}
-            className="w-8 rounded-full overflow-hidden"
-          >
-            <img src={postOwner.profileImg || "/avatar-placeholder.png"} />
-          </Link>
-        </div>
         <div className="flex flex-col flex-1">
-          <div className="flex gap-2 items-center mb-5">
-            <Link to={`/profile/${postOwner.username}`} className="font-bold">
-              {postOwner.fullName}
-            </Link>
-            <span className="text-gray-700 flex gap-1 text-sm">
-              <Link to={`/profile/${postOwner.username}`}>
-                @{postOwner.username}
+          <div className="flex items-center gap-2 pb-5 w-full h-full">
+            <div className="avatar">
+              <Link
+                to={`/profile/${postOwner.username}`}
+                className="w-10 h-10 rounded-full overflow-hidden"
+              >
+                <img src={postOwner.profileImg || "/avatar-placeholder.png"} />
               </Link>
-              <span>·</span>
-              <span>{formattedDate}</span>
-            </span>
+            </div>
+            <div className="flex justify-center flex-col ">
+              <Link
+                to={`/profile/${postOwner.username}`}
+                className="font-bold text-sm"
+              >
+                {postOwner.fullname}
+              </Link>
+              <span className="text-gray-700 flex  gap-1 text-sm">
+                <Link to={`/profile/${postOwner.username}`}>
+                  @{postOwner.username}
+                </Link>
+                <span>·</span>
+                <span>{formattedDate}</span>
+              </span>
+            </div>
+
             {isMyPost && (
               <span className="flex justify-end flex-1">
                 {!isDeleting && (
