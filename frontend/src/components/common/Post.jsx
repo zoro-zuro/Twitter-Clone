@@ -113,7 +113,7 @@ const Post = ({ post }) => {
         if (!res.ok || data.error) {
           throw new Error(data.error ? data.error : "Something went wrong");
         }
-        return data;
+        return data.comments;
       } catch (error) {
         throw new Error(error);
       }
@@ -254,10 +254,10 @@ const Post = ({ post }) => {
                         <div className="flex flex-col">
                           <div className="flex items-center gap-1">
                             <span className="font-bold">
-                              {comment.user.fullName}
+                              {comment.user.fullname || comment.fullname}
                             </span>
                             <span className="text-gray-700 text-sm">
-                              @{comment.user.username}
+                              @{comment.user.username || comment.username}
                             </span>
                           </div>
                           <div className="text-sm">{comment.text}</div>

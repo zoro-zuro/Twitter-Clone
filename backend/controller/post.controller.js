@@ -91,6 +91,7 @@ const commentPost = async (req, res) => {
     const { text } = req.body;
     const userId = req.user._id;
 
+    // Validate required fields
     if (!text) {
       return res.status(400).json({
         success: false,
@@ -98,6 +99,7 @@ const commentPost = async (req, res) => {
       });
     }
 
+    // Find the post
     const post = await Post.findById(postId);
     if (!post) {
       return res.status(404).json({
@@ -106,15 +108,27 @@ const commentPost = async (req, res) => {
       });
     }
 
+    // Create comment object
     const comment = {
       user: userId,
       text,
     };
-    const updatedComment = post.comments;
-    console.log(updatedComment);
+
+    // Add comment to the post
     post.comments.push(comment);
     await post.save();
-    res.json(updatedComment);
+
+    // Get the updated post with populated comment users
+    const updatedPost = await Post.findById(postId)
+      .select("comments -_id")
+      .populate({
+        path: "comments.user",
+        select:
+          "username fullname email followers following profileImg coverImg link bio createdAt updatedAt __v likedPosts",
+      });
+
+    // Return just the updated post (not in an array)
+    res.json(updatedPost);
   } catch (error) {
     res.status(500).json({
       success: false,

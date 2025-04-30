@@ -48,9 +48,9 @@ const SearchPage = () => {
     <div className="flex-[4_4_0] border-l border-r border-gray-700 min-h-screen pb-[52px] md:pb-0 relative">
       {!searchResults && (
         <img
-          src="\backgroundsearchimg.jpg"
+          src="/backgroundsearchimg.jpg"
           alt=""
-          className="absolute top-0 bottom-0 right-0 left-0 w-full h-full -z-50"
+          className="absolute top-0 bottom-0 right-0 left-0 w-full h-full -z-50 object-cover"
         />
       )}
       <div className="">
