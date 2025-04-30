@@ -17,6 +17,9 @@ const SignUpPage = () => {
     fullname: "",
     password: "",
   });
+
+  const querryClient = useQueryClient();
+
   const { mutate, isError, isPending, error } = useMutation({
     mutationFn: async ({ username, fullname, email, password }) => {
       try {
@@ -42,6 +45,7 @@ const SignUpPage = () => {
     },
     onSuccess: () => {
       toast.success("Account created successfully 🎉");
+      querryClient.invalidateQueries({ queryKey: ["authUser"] });
       setFormData({
         email: "",
         username: "",
